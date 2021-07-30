@@ -5,6 +5,7 @@
   "author": "https://github.com/faraazb/",
   "license": "MIT",
   "dependencies": {
+    "@graphql-tools/schema": "^8.0.1",
     "apollo-server-express": "^3.0.2",
     "express": "^4.17.1",
     "express-graphql": "^0.12.0",
