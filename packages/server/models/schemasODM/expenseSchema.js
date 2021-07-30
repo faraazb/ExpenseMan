@@ -20,6 +20,10 @@ const expenseSchema = new Schema({
         },
         currency: {
             type: String,
+            enum: {
+                values: Object.keys(currencies),
+                message: '{VALUE} is not a valid currency! Please check/update currencies.json'
+            },
             required: true
         },
         incurred_on: {
