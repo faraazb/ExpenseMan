@@ -30,9 +30,56 @@ const { GraphQLScalarType, Kind } = require("graphql");
 // import { validateJSDate, validateDateTime } from './validator';
 // import { parseDateTime } from './formatter';
 
+const validateTime = (time) => {
+  time = time.toUpperCase();
+  const TIME_REGEX = /^([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])(\.\d{1,})?(([Z])|([+|-]([01][0-9]|2[0-3]):[0-5][0-9]))$/;
+  return TIME_REGEX.test(time);
+};
+
+const parseDateTime = (dateTime) => {
+  return new Date(dateTime);
+};
 const validateJSDate = (date) => {
   const time = date.getTime();
   return time === time;
+};
+
+const leapYear = (year) => {
+  return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+};
+
+const validateDate = (datestring) => {
+  const RFC_3339_REGEX = /^(\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01]))$/;
+
+  if (!RFC_3339_REGEX.test(datestring)) {
+    return false;
+  }
+
+  // Verify the correct number of days for
+  // the month contained in the date-string.
+  const year = Number(datestring.substr(0, 4));
+  const month = Number(datestring.substr(5, 2));
+  const day = Number(datestring.substr(8, 2));
+
+  switch (month) {
+    case 2: // February
+      if (leapYear(year) && day > 29) {
+        return false;
+      } else if (!leapYear(year) && day > 28) {
+        return false;
+      }
+      return true;
+    case 4: // April
+    case 6: // June
+    case 9: // September
+    case 11: // November
+      if (day > 30) {
+        return false;
+      }
+      break;
+  }
+
+  return true;
 };
 
 const validateDateTime = (dateTimeString) => {

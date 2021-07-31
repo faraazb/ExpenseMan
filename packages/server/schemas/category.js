@@ -1,9 +1,9 @@
 
 const typeDef = `
     type Category {
-        _id: ID!
+        id: UUID!
         name: String!
     }
 `
 
-exports.CategoryTypeDef = typeDef;
+exports.ExpenseCategoryTypeDef = typeDef;

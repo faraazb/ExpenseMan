@@ -1,6 +1,19 @@
-var mongoose = require("mongoose");
-const { expenseCategorySchema } = require("./schemasODM/expenseCategorySchema");
+const { Sequelize, DataTypes } = require('sequelize');
 
-const ExpenseCategory = mongoose.model('ExpenseCategory', expenseCategorySchema);
-
-exports.ExpenseCategory = ExpenseCategory
+module.exports = (sequelize) => {
+    sequelize.define('ExpenseCategory', {
+        id: {
+            type: DataTypes.UUID,
+            defaultValue: Sequelize.UUIDV4,
+            primaryKey: true
+        },
+        name: {
+            type: DataTypes.STRING,
+            allowNull: false
+        }
+    }, {
+        tableName: "expense_categories",
+        underscored: true,
+        timestamps: true,
+    });
+}

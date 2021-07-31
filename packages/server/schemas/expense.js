@@ -1,15 +1,21 @@
 
 
 const typeDef = `
+    type User {
+        id: UUID!
+        name: String!
+    }
+
     type Expense {
-        _id: ID!
-        user: String!
+        id: UUID!
+        user: User!
         amount: Decimal!
         currency: Currency!
-        symbol_native: String
-        incurred_on: DateTime!
-        created_on: DateTime!
-        updated_on: DateTime!
+        currency_symbol: String
+        currency_decimal_digits: Int
+        incurredAt: DateTime!
+        createdAt: DateTime!
+        updatedAt: DateTime!
         category: Category!
         description: String
     }
@@ -17,25 +23,120 @@ const typeDef = `
 
 const Query = `
     type Query {
-        getExpense(_id: String!): Expense
+        getExpense(id: UUID!): Expense
         getAllExpenses: [Expense]
+        getExpensesByUserId(user_id: UUID!): [Expense]
+    }
+`
+const Mutation= `
+    type ExpenseResponse {
+        success: Boolean!
+        message: String
+        expense: Expense
+    }
+
+    type Mutation {
+        createExpense(
+            userId: UUID!
+            amount: Decimal!
+            currency: Currency!
+            incurredAt: DateTime!
+            categoryId: UUID!
+            description: String
+        ): ExpenseResponse!
+        updateExpense(
+            id: UUID!
+            amount: Decimal
+            currency: Currency
+            incurredAt: DateTime
+            categoryId: UUID
+            description: String
+        ): ExpenseResponse!
+        deleteExpense(
+            id: UUID!
+        ): ExpenseResponse!
     }
 `
 
 const Resolver = {
     Query: {
-        getExpense: async (obj, {_id}, {Expense}) => {
-            let expense = await Expense.findById(_id).populate("category")
-            return expense;
+        getExpense: async (obj, {id}, {Expense}) => {
+            try {
+                let expense = await Expense.findByPk(id, {include: ['ExpenseCategory', 'User']});
+                if (expense) {
+                    console.log(expense.toJSON())
+                    return expense.toJSON();
+                }
+                else {
+                    return new Error(`Expense with '${id}' does not exist`)
+                }
+            } catch (error ) {
+                console.log(error);
+                return new Error(`DB_ERROR: '${error}'`);
+            }
         },
-        getAllExpenses: async (obj, args, {Expense}) => {
-            // console.log(obj, args, context);
-            let expenses = await Expense.find().populate("category")
-            return expenses;
+        getAllExpenses: async (_, __, {Expense}) => {
+            try {
+                let expenses = await Expense.findAll({include: ['ExpenseCategory', 'User']});
+                return expenses
+            } catch (error) {
+                console.log(error);
+                return new Error(`DB_ERROR: '${error}'`);
+            }
+        },
+        getExpensesByUserId: async (obj, {user_id}, {Expense}) => {
+            try {
+                let expenses = await Expense.findAll({
+                    where: {user_id: user_id}, 
+                    include: ['ExpenseCategory']
+                });
+                return expenses
+            } catch (error) {
+                console.log(error);
+                return new Error(`DB_ERROR: '${error}'`);
+            }
+        }
+    },
+    Expense: {
+        user: async (obj, __, ___) => {
+            return obj.User
+        },
+        category: async (obj, _, __) => {
+            return obj.ExpenseCategory
+        }
+    },
+    Mutation: {
+        // TODO: Look into eager loading after instance creation
+        createExpense: async (_, 
+            {userId, amount, currency, incurredAt, categoryId, description}, 
+            {Expense}) => {
+            try {
+                let exp = await Expense.create({
+                    user_id: userId,
+                    amount: amount,
+                    currency: currency,
+                    incurredAt: incurredAt,
+                    expense_category_id: categoryId,
+                    description: description
+                });
+                if (exp) {
+                    return {
+                        success: true,
+                        expense: exp
+                    }
+                }
+            } catch (error) {
+                console.error(`Couldn't create resource: ${error}`);
+                return {
+                    success: false,
+                    message: "Couldn't create resource!"
+                }
+            }
         }
     }
 }
 
 exports.ExpenseTypeDef = typeDef;
 exports.ExpenseQuery = Query;
+exports.ExpenseMutation = Mutation;
 exports.ExpenseResolver = Resolver;

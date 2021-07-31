@@ -1,8 +1,4 @@
-var mongoose = require("mongoose");
-
-const { connectMongoDB } = require("./database");
-const { Expense, ExpenseCategory } = require("./models/models");
-
+var sequelize = require("./sequelize-setup");
 var express = require("express");
 var { graphqlHTTP } = require('express-graphql');
 const { ExecutableSchema } = require("./schemas/executableSchema")
@@ -10,11 +6,11 @@ const { ExecutableSchema } = require("./schemas/executableSchema")
 const app = express();
 const port = 3000;
 
-connectMongoDB();
+// console.log(sequelize.model);
 
-app.use('/graphql', graphqlHTTP({
+app.use("/graphql", graphqlHTTP({
   schema: ExecutableSchema,
-  context: { Expense },
+  context: sequelize.models,
   graphiql: true,
 }));
 

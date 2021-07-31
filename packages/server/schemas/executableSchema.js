@@ -1,25 +1,29 @@
 const { makeExecutableSchema } = require("@graphql-tools/schema");
 const { merge } = require("lodash");
 
-const { ExpenseTypeDef, ExpenseQuery, ExpenseResolver } = require("./expense");
-const { CategoryTypeDef } = require("./category");
-const { Currency } = require("./utils/currency")
-const { GraphQLDateTime } = require("./utils/datetime")
+const { ExpenseTypeDef, ExpenseQuery, ExpenseResolver, ExpenseMutation } = require("./expense");
+const { ExpenseCategoryTypeDef } = require("./category");
+const { Currency } = require("./utils/currency");
+const { GraphQLDateTime } = require("./utils/datetime");
 const { GraphQLDecimal } = require("./utils/decimal");
+const { GraphQLUUID } = require("./utils/UUID");
 
 const typeResolvers = {
   DateTime: GraphQLDateTime,
-  Decimal: GraphQLDecimal
+  Decimal: GraphQLDecimal,
+  UUID: GraphQLUUID
 }
 
 const executableSchema = makeExecutableSchema({
   typeDefs: [
       `scalar DateTime`, 
-      `scalar Decimal`, 
+      `scalar Decimal`,
+      `scalar UUID`,
       Currency, 
-      CategoryTypeDef, 
+      ExpenseCategoryTypeDef, 
       ExpenseTypeDef, 
-      ExpenseQuery
+      ExpenseQuery,
+      ExpenseMutation
     ],
   resolvers: merge(typeResolvers, ExpenseResolver)
 });

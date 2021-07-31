@@ -1,9 +1,19 @@
-var mongoose = require("mongoose");
-const { userSchema } = require("./schemasODM/userSchema");
+const { Sequelize, DataTypes } = require('sequelize');
 
-const User = mongoose.model("User", userSchema);
-
-exports.User = User;
-
-
-// Loop the loop
+module.exports = (sequelize) => {
+    sequelize.define('User', {
+        id: {
+            type: DataTypes.UUID,
+            defaultValue: Sequelize.UUIDV4,
+            primaryKey: true
+        },
+        name: {
+            type: DataTypes.STRING,
+            allowNull: false
+        }
+    }, {
+        tableName: "users",
+        underscored: true,
+        timestamps: true,
+    });
+}
