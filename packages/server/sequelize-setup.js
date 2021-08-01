@@ -1,21 +1,12 @@
-// function applyExtraSetup(sequelize) {
-// 	const { User, Expense, ExpenseCategory } = sequelize.models;
-
-// 	User.hasMany(Expense);
-// 	Expense.belongsTo(User);
-
-//     Expense.belongsTo(ExpenseCategory);
-// }
-
-// module.exports = { applyExtraSetup };
-
 const { Sequelize } = require("sequelize");
-// const { applyExtraSetup } = require("./sequelize-setup");
-
 
 const sequelize = new Sequelize("postgres://postgres:winterfell@localhost:5432/ExpenseMan")
 
-// var mongoose = require("mongoose");
+/*
+* To turn off logging, set options above, or use the below line
+* sequelize.options.logging = false anywhere sequelize instance is
+* available
+*/
 
 async function assertDatabaseConnectionOk() {
 	console.log(`Checking database connection...`);

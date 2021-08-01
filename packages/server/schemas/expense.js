@@ -129,7 +129,7 @@ const Resolver = {
                 console.error(`Couldn't create Expense: ${error}`);
                 return {
                     success: false,
-                    message: "Couldn't create Expense!"
+                    message: `DB_ERROR: '${error}'`                       
                 }
             }
         },
@@ -142,18 +142,29 @@ const Resolver = {
                     if (args.incurredAt !== undefined) exp.incurredAt = args.incurredAt;
                     if (args.categoryId !== undefined) exp.expense_category_id = args.categoryId;
                     if (args.description !== undefined) exp.description = args.description;
+                    exp = await exp.save()
+                    return {
+                        success: true,
+                        expense: exp
+                    }
                 }
                 else {
-                    return new Error(`Expense with '${arg.id}' does not exist`)
+                    return {
+                        success: false,
+                        message: `Expense with '${arg.id}' does not exist`                       
+                    }
                 }
             } catch (error) {
-                return new Error(`DB_ERROR: '${error}'`);
+                return {
+                    success: false,
+                    message: `DB_ERROR: '${error}'`                      
+                }
             }
         },
         deleteExpense: async (_, {id}, {Expense}) => {
             try {
                 let exp = await Expense.destroy({where: {id: id}});
-                if (exp = 1) {
+                if (exp === 1) {
                     return {
                         success: true,
                         message: "Expense deleted"
@@ -162,14 +173,14 @@ const Resolver = {
                 else {
                     return {
                         success: false,
-                        message: "Couldn't delete Expense!"
+                        message: "Couldn't delete Expense. Check UUID."
                     }
                 }
             } catch (error) {
                 console.error(`Couldn't delete Expense: ${error}`);
                 return {
                     success: false,
-                    message: "Couldn't delete Expense!"
+                    message: `DB_ERROR: '${error}'`
                 }
             }
         }
