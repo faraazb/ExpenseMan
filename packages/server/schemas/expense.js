@@ -126,10 +126,50 @@ const Resolver = {
                     }
                 }
             } catch (error) {
-                console.error(`Couldn't create resource: ${error}`);
+                console.error(`Couldn't create Expense: ${error}`);
                 return {
                     success: false,
-                    message: "Couldn't create resource!"
+                    message: "Couldn't create Expense!"
+                }
+            }
+        },
+        updateExpense: async (_, args, {Expense}) => {
+            try {
+                let exp = await Expense.findByPk(args.id);
+                if (exp) {
+                    if (args.amount !== undefined) exp.amount = args.amount;
+                    if (args.currency !== undefined) exp.currency = args.currency;
+                    if (args.incurredAt !== undefined) exp.incurredAt = args.incurredAt;
+                    if (args.categoryId !== undefined) exp.expense_category_id = args.categoryId;
+                    if (args.description !== undefined) exp.description = args.description;
+                }
+                else {
+                    return new Error(`Expense with '${arg.id}' does not exist`)
+                }
+            } catch (error) {
+                return new Error(`DB_ERROR: '${error}'`);
+            }
+        },
+        deleteExpense: async (_, {id}, {Expense}) => {
+            try {
+                let exp = await Expense.destroy({where: {id: id}});
+                if (exp = 1) {
+                    return {
+                        success: true,
+                        message: "Expense deleted"
+                    }
+                }
+                else {
+                    return {
+                        success: false,
+                        message: "Couldn't delete Expense!"
+                    }
+                }
+            } catch (error) {
+                console.error(`Couldn't delete Expense: ${error}`);
+                return {
+                    success: false,
+                    message: "Couldn't delete Expense!"
                 }
             }
         }
