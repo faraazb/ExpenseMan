@@ -27,7 +27,7 @@ const Query = `
     type Query {
         getExpense(id: UUID!): Expense
         getAllExpenses: [Expense]
-        getExpensesByUserId(user_id: UUID!): [Expense]
+        getExpensesByUserId(userId: UUID!): [Expense]
     }
 `
 const Mutation= `
@@ -90,13 +90,13 @@ const Resolver = {
                 return new Error(`DB_ERROR: '${error}'`);
             }
         },
-        getExpensesByUserId: async (obj, {user_id}, {Expense}) => {
+        getExpensesByUserId: async (obj, {userId}, {Expense}) => {
             if (!user || user.id != user_id) {
                 return new Error(`You are not authenticated or authorized`);
             }
             try {
                 let expenses = await Expense.findAll({
-                    where: {user_id: user_id}, 
+                    where: {user_id: userId}, 
                     include: ['ExpenseCategory']
                 });
                 return expenses
@@ -119,7 +119,7 @@ const Resolver = {
         createExpense: async (_, 
             {userId, amount, currency, incurredAt, categoryId, description}, 
             {Expense, user}) => {
-            if (!user || user.id != user_id) {
+            if (!user || user.id != userId) {
                 return new Error(`You are not authenticated or authorized`);
             }
             try {

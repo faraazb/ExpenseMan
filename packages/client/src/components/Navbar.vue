@@ -1,5 +1,5 @@
 <template>
-    <b-navbar>
+    <b-navbar class="main-navbar">
         <template #brand>
             <b-navbar-item tag="router-link" :to="{ path: '/' }">
                 <span class="app-logo">ExpenseMan</span>
@@ -19,14 +19,30 @@
         </template>
 
         <template #end>
+            <!-- <span>{{}}</span> -->
             <b-navbar-item tag="div">
                 <div class="buttons">
-                    <a class="button is-primary">
+                    <b-button 
+                        v-if="!loggedIn" 
+                        class="button is-primary" 
+                        tag="router-link" to="/signup"
+                    >
                         <strong>Sign up</strong>
-                    </a>
-                    <a class="button is-light">
-                        Log in
-                    </a>
+                    </b-button>
+                    <b-button 
+                        v-if="!loggedIn" 
+                        class="is-primary is-light" 
+                        tag="router-link" to="/login"
+                    >
+                        Log In
+                    </b-button>
+                    <b-button 
+                        v-if="loggedIn"
+                        @click="handleLogOut"
+                        class="is-primary is-light"
+                    >
+                        Log Out
+                    </b-button>
                 </div>
             </b-navbar-item>
         </template>
@@ -35,14 +51,31 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
 
 export default {
-    name: 'navbar'
+    name: 'navbar',
+    computed: {
+        loggedIn() {
+            return this.$store.state.auth.loggedIn;
+        }
+    },
+    methods: {
+        handleLogOut() {
+            this.$store.dispatch('auth/logout');
+        }
+    }
 }
 
 </script>
 
 <style>
+
+.main-navbar {
+    position: sticky;
+    top: 0;
+}
+
 .app-logo {
     font-family: 'Quicksand';
     font-weight: 600;

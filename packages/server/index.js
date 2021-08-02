@@ -1,5 +1,6 @@
 var sequelize = require("./sequelize-setup");
 var express = require("express");
+var cors = require("cors");
 var { graphqlHTTP } = require("express-graphql");
 const { ExecutableSchema } = require("./schemas/executableSchema");
 const jwt = require("express-jwt");
@@ -10,6 +11,7 @@ const port = 3000;
 
 
 app.use(bodyParser.json());
+app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(

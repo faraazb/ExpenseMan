@@ -8,7 +8,6 @@ const { NoUnusedFragmentsRule } = require("graphql");
 const { User } = models;
 
 router.post("/signup", (req, res) => {
-    console.log(req.body)
     permissions = []
     bcrypt.hash(req.body.password, 10, (error, hashedPassword) => {
         if (error) console.log(error);
@@ -44,8 +43,7 @@ router.post("/signup", (req, res) => {
 });
 
 
-router.get("/login", (req, res) => {
-    console.log(req)
+router.post("/login", (req, res) => {
     User.findOne({where: {email: req.body.email}})
         .then(user => {
             if (user === null) {

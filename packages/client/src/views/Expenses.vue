@@ -20,13 +20,13 @@
                     <div class="expense-tools-buttons">
                         <b-button 
                             class="expense-tools-button" 
-                            type="is-primary is-light"
+                            type="is-primary is-light is-small"
                             icon-left="chevron-up"
                         >
                             Date
                         </b-button>
                         <b-button 
-                            type="is-primary is-light"
+                            type="is-primary is-light is-small"
                             icon-left="chevron-up"
                         >
                             Amount
