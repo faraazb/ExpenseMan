@@ -4,6 +4,8 @@ const typeDef = `
     type User {
         id: UUID!
         name: String!
+        email: String!
+        defaultCurrency: Currency!
     }
 
     type Expense {
@@ -75,7 +77,11 @@ const Resolver = {
                 return new Error(`DB_ERROR: '${error}'`);
             }
         },
-        getAllExpenses: async (_, __, {Expense}) => {
+        getAllExpenses: async (_, __, {Expense, user}) => {
+            console.log(user);
+            if (!user) {
+                return new Error(`You are not authenticated`);
+            }
             try {
                 let expenses = await Expense.findAll({include: ['ExpenseCategory', 'User']});
                 return expenses
@@ -85,6 +91,9 @@ const Resolver = {
             }
         },
         getExpensesByUserId: async (obj, {user_id}, {Expense}) => {
+            if (!user || user.id != user_id) {
+                return new Error(`You are not authenticated or authorized`);
+            }
             try {
                 let expenses = await Expense.findAll({
                     where: {user_id: user_id}, 
@@ -109,7 +118,10 @@ const Resolver = {
         // TODO: Look into eager loading after instance creation
         createExpense: async (_, 
             {userId, amount, currency, incurredAt, categoryId, description}, 
-            {Expense}) => {
+            {Expense, user}) => {
+            if (!user || user.id != user_id) {
+                return new Error(`You are not authenticated or authorized`);
+            }
             try {
                 let exp = await Expense.create({
                     user_id: userId,
@@ -133,10 +145,16 @@ const Resolver = {
                 }
             }
         },
-        updateExpense: async (_, args, {Expense}) => {
+        updateExpense: async (_, args, {Expense, user}) => {
+            if (!user) {
+                return new Error(`You are not authenticated`);
+            }
             try {
                 let exp = await Expense.findByPk(args.id);
                 if (exp) {
+                    if (exp.user_id != user.id) {
+                        return new Error(`You are not authenticated`);
+                    }
                     if (args.amount !== undefined) exp.amount = args.amount;
                     if (args.currency !== undefined) exp.currency = args.currency;
                     if (args.incurredAt !== undefined) exp.incurredAt = args.incurredAt;
@@ -161,7 +179,10 @@ const Resolver = {
                 }
             }
         },
-        deleteExpense: async (_, {id}, {Expense}) => {
+        deleteExpense: async (_, {id}, {Expense, user}) => {
+            if (!user) {
+                return new Error(`You are not authenticated`);
+            }
             try {
                 let exp = await Expense.destroy({where: {id: id}});
                 if (exp === 1) {

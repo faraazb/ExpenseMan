@@ -48,7 +48,7 @@ Expense.belongsTo(ExpenseCategory, {
 
 async function init() {
 	await assertDatabaseConnectionOk();
-	// await sequelize.sync();
+	await sequelize.sync();
 	console.log("All tables were successfully created")
 }
 
