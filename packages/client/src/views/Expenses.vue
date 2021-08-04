@@ -1,13 +1,55 @@
 <template>
     <div class="view-expenses">
+        <b-modal
+            v-model="isAddExpenseModalActive"
+            has-modal-card
+            trap-focus
+            :destroy-on-hide="false"
+            aria-role="dialog"
+            aria-modal>
+            <template #default="props">
+                <add-expense-modal  v-bind="addExpenseForm" @close="props.close">
+                </add-expense-modal>
+            </template>
+        </b-modal>
         <div class="view-expenses-left">
-            <div class="categories-container notification">
-            <div class="title-category">Categories</div>
-        </div>
+            <div class="expenses-toolbox">
+                <div>
+                    <b-button 
+                        class="is-primary is-light add-expense-button" 
+                        expanded
+                        @click="isAddExpenseModalActive = true"
+                    >
+                        Add Expense
+                    </b-button>
+                </div>
+                <div class="categories-container notification">
+                    <div class="title-category">
+                        Categories
+                    </div>
+                    <div class="expense-tools-container">
+                        <tag-input v-on:categories-selected="filterByCategory"></tag-input>
+                        <div class="expense-tools-buttons">
+                            <b-button
+                                class="expense-tools-button" 
+                                type="is-warning is-small"
+                                icon-left="chevron-up"
+                            >
+                                Date
+                            </b-button>
+                            <b-button 
+                                type="is-warning is-small"
+                                icon-left="chevron-up"
+                            >
+                                Amount
+                            </b-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="view-expenses-right">
             <div class="expenses-container">
-            <!-- <div class="title-expense">Expenses</div> -->
                 <b-field>
                     <b-input placeholder="Search..."
                         type="search"
@@ -15,52 +57,81 @@
                         icon="search">
                     </b-input>
                 </b-field>
-                <div class="expense-tools-container">
-                    <tag-input></tag-input>
-                    <div class="expense-tools-buttons">
-                        <b-button 
-                            class="expense-tools-button" 
-                            type="is-primary is-light is-small"
-                            icon-left="chevron-up"
-                        >
-                            Date
-                        </b-button>
-                        <b-button 
-                            type="is-primary is-light is-small"
-                            icon-left="chevron-up"
-                        >
-                            Amount
-                        </b-button>
-                    </div>
-                </div>
                 <div class="expense-list-container">
-                    <div class="tile is-ancestor expense-list">
-                        <div class="tile is-parent is-vertical">
-                            <div class="tile is-child box expense-card">
-                                Mein terii
-                            </div>
-                            <div class="tile is-child box expense-card">
-                                Helo world
-                            </div>
-                            <div class="tile is-child box expense-card">
-                                Kutta paalu VueJS ke naam ka
-                            </div>
-                            <div class="tile is-child box expense-card">
-                                Kutta paalu VueJS ke naam ka
-                            </div>
-                            <div class="tile is-child box expense-card">
-                                Kutta paalu VueJS ke naam ka
-                            </div>
-                            <div class="tile is-child box expense-card">
-                                Kutta paalu VueJS ke naam ka
-                            </div>
-                        </div>
+                    <div class="expense-list">
+                        <expense-card
+                            v-for="expense in expenseList" 
+                            v-bind:key="expense.id"
+                            v-bind:expense="expense"
+                            class="box expense-card"
+                        >
+                        </expense-card>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </template>
+
+
+<script>
+import TagInput from '@/components/TagInput.vue';
+import ExpenseCard from '@/components/ExpenseCard.vue'
+import { mapActions, mapGetters, mapState } from 'vuex';
+import AddExpenseModal from '../components/AddExpenseModal.vue';
+
+export default {
+    components: {
+        TagInput,
+        ExpenseCard,
+        AddExpenseModal,
+    },
+    data: function() {
+        return {
+            isAddExpenseModalActive: false,
+            addExpenseForm: {
+                modalTitle: "Add an Expense",
+                amount: null,
+                category: null,
+                incurredAt: null,
+                description: null,
+                action: 'add'
+            }
+        }
+    },
+    computed: {
+        ...mapState({
+            categories: state => state.expenses.categories,
+            defaultCurrency: state => state.auth.user.default_currency
+        }),
+        ...mapGetters({
+            expenses: 'expenses/sortedByTimeLatestFirst'
+        }),
+        expenseList: function() {
+            return this.expenses;
+        }
+    },
+    created() {
+        this.getExpenses(this.$store.state.auth.user.id);
+        if (this.$store.state.expenses.categories === null) {
+            this.getCategories();
+        }
+    },
+    methods: {
+        ...mapActions('expenses', {
+            getExpenses: 'fetchExpenses',
+            getCategories: 'fetchCategories',
+        }),
+        filterByCategory(categories) {
+            // console.log("emit recieved");
+            this.$store.dispatch('expenses/addFilterCategory', categories);
+        },
+
+    }
+};
+
+</script>
+
 
 <style>
 
@@ -73,36 +144,40 @@
     flex-direction: row;
     max-width: 100%;
     max-height: 100%;
-    margin: 20px 10px 10px 10px;
-    /* justify-content: center; */
+    justify-content: center;
 }
 
 .view-expenses-left {
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
-    width: 30vw;
+    width: 40vw;
     height: 100%;
 }
 
 .view-expenses-right {
     display: flex;
     flex-direction: row;
-    flex-grow: 1;
-    height: 100%;
+    width: 60vw;
 }
 
 
 .expenses-container {
     /* width: 60%; */
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
     width: 100%;
-    max-width: 650px;
+    max-width: 500px;
     max-height: 100%;
     /* overflow: auto; */
 }
 
+.add-expense-button {
+    margin-bottom: 10px;
+}
+
 .categories-container {
-    margin-right: 50px;
     max-height: 400px;
     min-width: 250px;
 }
@@ -117,10 +192,14 @@
     font-size: 2rem;
 }
 
-.expense-tools {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
+.expenses-toolbox {
+    margin: 20px 60px 0 0;
+    max-width: 300px;
+    min-width: 300px;
+}
+
+.expense-tools-container {
+    max-width: 100%;
 }
 
 .expense-tools-buttons {
@@ -132,32 +211,29 @@
 }
 
 .expense-list-container {
-    /* margin: 20px 20px 10px 20px; */
-    max-width: 100%;
-    /* height: 100%; */
-    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    /* height: 100vh; */
+    flex-grow: 1;
     overflow: auto;
-    /* overflow-x: auto; */
+    margin: 5px 0 5px 0;
 }
+
+ /* Hide scrollbar for Chrome, Safari and Opera */
+.expense-list-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.expense-list-container {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+} 
 
 .expense-list {
-    margin: 0 10px 0 10px;
-}
-
-.expense-card {
-    /* background-color: red; */
-    /* margin: 20px 20px 20px 20px; */
+    display: flex;
+    flex-direction: column;
+    margin: 10px 5px 10px 5px;
 }
 
 </style>
-
-<script>
-import TagInput from '@/components/TagInput.vue';
-
-export default {
-  components: {
-    TagInput,
-  },
-};
-
-</script>

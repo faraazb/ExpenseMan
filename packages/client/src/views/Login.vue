@@ -5,7 +5,7 @@
                 <div class="login-header">
                     Log In
                 </div>
-                <div class="login-form-container">
+                <form class="login-form-container">
 
                     <b-field class="login-form-item form-group" label="Email"
                         type="is-primary"
@@ -13,7 +13,7 @@
                         <b-input
                             v-model="email"
                             type="email"
-                            value="john@"
+                            required
                         >
                         </b-input>
                     </b-field>
@@ -22,16 +22,16 @@
                         type="is-primary">
                         <b-input
                             v-model="password"
-                            type="password" 
-                            maxlength="30"
+                            type="password"
+                            required
                         >
                         </b-input>
                     </b-field>
 
-                    <b-button @click.prevent="handleLogin" class="is-info" expanded>
+                    <b-button @click.prevent="formCheck" class="is-info" expanded>
                         Log In
                     </b-button>
-                </div>
+                </form>
             </div>
         </div>
     </div>
@@ -43,21 +43,37 @@ export default {
     name: 'Login',
     data: function() {
         return {
-            email: 'mfaraazb@gmail.com',
-            password: 'helloworld',
+            email: null,
+            password: null,
         }
     },
     methods: {
+        formCheck() {
+            if (this.email && this.password) {
+                this.handleLogin();
+            }
+            else {
+                this.$buefy.snackbar.open({
+                    message: 'Please enter your credentials!',
+                    type: 'is-info',
+                    position: 'is-top'
+                });
+            }
+        },
         handleLogin() {
             this.$store.dispatch('auth/login', {
                 email: this.email, 
                 password: this.password
             })
             .then(data => {
-                
+                this.$buefy.snackbar.open({
+                    message: 'Welcome back!',
+                    type: 'is-info',
+                    position: 'is-bottom'
+                });
             }),
             error => {
-                // console.log("VUEEEE: ", error);
+                console.log("Login Error: ", error);
             }
         }
     }
@@ -76,10 +92,10 @@ export default {
 }
 
 .login-container {
-    display: flex;           /* establish flex container */
-    flex-direction: column;  /* make main axis vertical */
-    justify-content: center; /* center items vertically, in this case */
-    align-items: center;     /* center items horizontally, in this case */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     min-height: 100%;
 }
 
@@ -88,7 +104,7 @@ export default {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    margin: 40px 0 20px 0;
+    margin: 40px 0 40px 0;
 }
 
 .login-header {

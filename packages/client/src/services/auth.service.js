@@ -15,12 +15,12 @@ function login(email, password) {
     })
     .then(response => {
         if (response.data.token) {
-            localStorage.setItem('userToken', JSON.stringify(response.data.token));
+            console.log(typeof(response.data.token))
+            localStorage.setItem('userToken', response.data.token);
         }
         return response.data
     }, error => {
-        //For now, this is fine.
-        console.log(error)
+        return error;
     });
 }
 
@@ -34,7 +34,7 @@ function signup(user) {
     })
     .then(response => {
         if (response.data.token) {
-            localStorage.setItem('userToken', JSON.stringify(response.data.token));
+            localStorage.setItem('userToken', response.data.token);
         }
         return response.data
     }, error => {

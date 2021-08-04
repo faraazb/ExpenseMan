@@ -3,12 +3,11 @@ const router = express.Router();
 const { models } = require("./sequelize-setup");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const { NoUnusedFragmentsRule } = require("graphql");
+const { JWT_SECRET } = require("./server-config");
 
 const { User } = models;
 
 router.post("/signup", (req, res) => {
-    permissions = []
     bcrypt.hash(req.body.password, 10, (error, hashedPassword) => {
         if (error) console.log(error);
         User.create({
@@ -23,15 +22,15 @@ router.post("/signup", (req, res) => {
                 name: user.name,
                 email: user.email,
                 default_currency: user.defaultCurrency,
-                permissions: permissions
             }
             const options = {
                 algorithm: "HS256",
                 expiresIn: "2 days",
             }
-            const token = jwt.sign(payload, 'a_terrible_secret', options);
+            const token = jwt.sign(payload, JWT_SECRET, options);
             console.log('Token', token);
             res.status(201).send({
+                id: user.id,
                 name: user.name, 
                 email: user.email, 
                 default_currency: user.defaultCurrency, 
@@ -70,8 +69,9 @@ router.post("/login", (req, res) => {
                             algorithm: "HS256",
                             expiresIn: "2 days",
                         }
-                        const token = jwt.sign(payload, 'a_terrible_secret', options);
+                        const token = jwt.sign(payload, JWT_SECRET, options);
                         return res.status(201).send({
+                            id: user.id,
                             name: user.name, 
                             email: user.email, 
                             default_currency: user.defaultCurrency, 

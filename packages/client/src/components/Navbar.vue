@@ -6,20 +6,22 @@
             </b-navbar-item>
         </template>
         <template #start>
-            <b-navbar-item tag="router-link" :to="{ path: '/dashboard' }">
+            <b-navbar-item v-if="loggedIn" tag="router-link" :to="{ path: '/dashboard' }">
                 <!-- <router-link label="Home" :to="{ name: 'Home'}" >Home</router-link> -->
                 Dashboard
             </b-navbar-item>
-            <b-navbar-item tag="router-link" :to="{ path: '/expenses' }">
+            <b-navbar-item v-if="loggedIn" tag="router-link" :to="{ path: '/expenses' }">
                 Expenses
             </b-navbar-item>
-            <b-navbar-item href="#">
+            <b-navbar-item v-if="loggedIn" tag="router-link" :to="{ path: '/reports' }">
                 Reports
             </b-navbar-item>
         </template>
 
         <template #end>
-            <!-- <span>{{}}</span> -->
+            <b-navbar-item v-if="loggedIn" tag="div">
+                <span>Hello, {{user.name}}!</span>
+            </b-navbar-item>
             <b-navbar-item tag="div">
                 <div class="buttons">
                     <b-button 
@@ -51,18 +53,21 @@
 </template>
 
 <script>
-import { mapState } from 'vuex'
 
 export default {
     name: 'navbar',
     computed: {
         loggedIn() {
             return this.$store.state.auth.loggedIn;
+        },
+        user() {
+            return this.$store.state.auth.user;
         }
     },
     methods: {
         handleLogOut() {
             this.$store.dispatch('auth/logout');
+            window.location.reload();
         }
     }
 }

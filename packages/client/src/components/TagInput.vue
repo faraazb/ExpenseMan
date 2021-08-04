@@ -2,12 +2,12 @@
     <section>
         <b-field>
             <b-taginput
-                v-model="tags"
-                :data="filteredTags"
+                v-model="selectedCategories"
+                :data="categories"
                 size="is-small"
                 autocomplete
                 open-on-focus
-                field="user.first_name"
+                field="name"
                 icon="label"
                 placeholder="Click here to select"
                 @typing="getFilteredTags">
@@ -22,23 +22,35 @@
 
     export default {
         name: 'tag-input',
+        // props: ['selectedCategories'],
         data() {
             return {
-                filteredTags: data,
+                filteredCategories: this.categories,
                 isSelectOnly: false,
-                tags: [],
+                selectedCategories: [],
                 allowNew: false,
                 openOnFocus: false
             }
         },
+        computed: {
+            categories() {
+                return this.$store.state.expenses.categories;
+            }
+        },
         methods: {
             getFilteredTags(text) {
-                this.filteredTags = data.filter((option) => {
-                    return option.user.first_name
+                this.filteredCategories = this.categories.filter((option) => {
+                    return option.name
                         .toString()
                         .toLowerCase()
                         .indexOf(text.toLowerCase()) >= 0
-                })
+                });
+            }
+        },
+        watch: {
+            selectedCategories: function(value) {
+                // console.log(value)
+                this.$emit('categories-selected', value)
             }
         }
     }

@@ -2,9 +2,21 @@ import axios from 'axios';
 import router from '../../router';
 import { authService } from '../../services/auth.service';
 
+function parseJwt (token) {
+    if (!token) {
+        return false
+    }
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+
+    return JSON.parse(jsonPayload);
+};
 
 // Resolve this
-const user = JSON.parse(localStorage.getItem('userToken'));
+const user = parseJwt(localStorage.getItem('userToken'));
 
 const state = user
   ? { loggedIn: true , user }

@@ -54,7 +54,48 @@ async function dataFactory() {
     }
 }
 
-dataFactory();
+// dataFactory();
 
+async function createCategories() {
+    const categoriesID = []
+    for (const category of categories) {
+        const ctg = await ExpenseCategory.create({name: category});
+        categoriesID.push(ctg.id);
+    }
+}
 
+// createCategories();
 
+function getWeeksInMonth(year, month) {
+    const weeks = [],
+      firstDate = new Date(year, month, 1),
+      lastDate = new Date(year, month + 1, 0),
+      numDays = lastDate.getDate();
+  
+    let dayOfWeekCounter = firstDate.getDay();
+  
+    for (let date = 1; date <= numDays; date++) {
+      if (dayOfWeekCounter === 0 || weeks.length === 0) {
+        weeks.push([]);
+      }
+      weeks[weeks.length - 1].push(date);
+      dayOfWeekCounter = (dayOfWeekCounter + 1) % 7;
+    }
+  
+    return weeks
+      .filter((w) => !!w.length)
+      .map((w) => ({
+        start: w[0],
+        end: w[w.length - 1],
+        dates: w,
+      }));
+  }
+
+//   console.log(getWeeksInMonth(2021, 4));
+
+// async function getSum() {
+//     let expenses = Expense.sum('amount', {where: {userId: ""}, group: ExpenseCategory.id, include: ['ExpenseCategory']});
+//     console.log(JSON.stringify(expenses));
+// }
+
+// getSum();

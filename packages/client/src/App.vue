@@ -1,10 +1,6 @@
 <template>
     <div id="main">
       <navbar></navbar>
-      <p v-if="user">
-        Current user: {{user.name}}
-        Email: {{user.email}}
-      </p>
       <div id="main-content">
         <router-view/>
       </div>
@@ -24,9 +20,6 @@ export default {
       return this.$store.state.auth.user;
     }
   },
-  created: function () {
-    console.log(JSON.parse(this.$store.state.auth.user))
-  }
 };
 
 </script>

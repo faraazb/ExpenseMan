@@ -1,9 +1,9 @@
 const { Sequelize } = require("sequelize");
-
-const sequelize = new Sequelize("postgres://postgres:winterfell@localhost:5432/ExpenseMan")
+const { DB_URI } = require("./server-config");
+const sequelize = new Sequelize(DB_URI);
 
 /*
-* To turn off logging, set options above, or use the below line
+* To turn off sequelize query logging, set options above, or use the below line
 * sequelize.options.logging = false anywhere sequelize instance is
 * available
 */

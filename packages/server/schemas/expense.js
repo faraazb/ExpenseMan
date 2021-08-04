@@ -1,4 +1,5 @@
-
+const { QueryTypes } = require('sequelize');
+const sequelize = require('../sequelize-setup');
 
 const typeDef = `
     type User {
@@ -21,6 +22,17 @@ const typeDef = `
         category: Category!
         description: String
     }
+
+    type ExpenseResponse {
+        success: Boolean!
+        message: String
+        expense: Expense
+    }
+
+    type CategorizedTotalExpense {
+        amount: Decimal!
+        category: Category!
+    }
 `
 
 const Query = `
@@ -28,15 +40,12 @@ const Query = `
         getExpense(id: UUID!): Expense
         getAllExpenses: [Expense]
         getExpensesByUserId(userId: UUID!): [Expense]
+        getTotalExpense(userId: UUID!): Decimal!
+        getTotalExpenseByWeek(userId: UUID!): [Decimal]!
+        getTotalExpenseByCategory(userId: UUID!): [CategorizedTotalExpense]!
     }
 `
 const Mutation= `
-    type ExpenseResponse {
-        success: Boolean!
-        message: String
-        expense: Expense
-    }
-
     type Mutation {
         createExpense(
             userId: UUID!
@@ -90,8 +99,8 @@ const Resolver = {
                 return new Error(`DB_ERROR: '${error}'`);
             }
         },
-        getExpensesByUserId: async (obj, {userId}, {Expense}) => {
-            if (!user || user.id != user_id) {
+        getExpensesByUserId: async (obj, {userId}, {Expense, user}) => {
+            if (!user || user.id != userId) {
                 return new Error(`You are not authenticated or authorized`);
             }
             try {
@@ -104,6 +113,74 @@ const Resolver = {
                 console.log(error);
                 return new Error(`DB_ERROR: '${error}'`);
             }
+        },
+        getTotalExpense: async (_, {userId}, {Expense, user}) => {
+            if (!user || user.id != userId) {
+                return new Error(`You are not authenticated or authorized`);
+            }
+            try {
+                let amount = await Expense.sum('amount', {where: {user_id: userId}});
+                return amount;
+            } catch (error) {
+                console.log(error);
+                return new Error(`DB_ERROR: '${error}'`);
+            }
+        },
+        getTotalExpenseByCategory: async(_, {userId}, {user}) => {
+            if (!user || user.id != userId) {
+                return new Error(`You are not authenticated or authorized`);
+            }
+            try {
+                let expenses = await sequelize.query(`select ec.name as category, sum(amount) as amount, ec.id
+                from expenses inner join expense_categories ec on ec.id = expenses.expense_category_id
+                where expenses.user_id = ?
+                group by ec.id;`, {
+                    replacements: [userId],
+                    type: QueryTypes.SELECT
+                });
+                return expenses;
+            } catch (error) {
+                console.log(error)
+                return new Error(`DB_ERROR: '${error}'`);
+            }
+        },
+        getTotalExpenseByWeek: async(_, {userId}, {user}) => {
+            if (!user || user.id != userId) {
+                return new Error(`You are not authenticated or authorized`);
+            }
+            try {
+                const d = new Date()
+                let expenses = await sequelize.query(`select incurred_at, amount from expenses
+                where user_id = ?
+                and extract(month from incurred_at) = ?`, {
+                    replacements: [userId, d.getMonth()+1]
+                })
+                let total = [null, null, null, null]
+                expenses[0].forEach(expense => {
+                    let day = new Date(expense.incurred_at).getDate();
+                    let week = day/7;
+                    let amount = Number(expense.amount);
+                    if (week <= 1) {
+                        if (total[0] === null) total[0] = 0;
+                        total[0] = total[0] + amount;
+                    }
+                    else if (week <= 2) {
+                        if (total[1]=== null) total[1]= 0;
+                        total[1] = total[1] + amount;
+                    }
+                    else if (week <= 3) {
+                        if (total[2] === null) total[2] = 0;
+                        total[2] = total[2] + amount;
+                    }
+                    else if (week > 3) {
+                        if (total[3] === null) total[3] = 0;
+                        total[3] = total[3] + amount;
+                    }
+                });
+                return total;
+            } catch (error) {
+                console.log(error)
+            }
         }
     },
     Expense: {
@@ -112,6 +189,14 @@ const Resolver = {
         },
         category: async (obj, _, __) => {
             return obj.ExpenseCategory
+        }
+    },
+    CategorizedTotalExpense: {
+        category: async(obj, _, __) => {
+            return {
+                name: obj.category,
+                id: obj.id
+            }
         }
     },
     Mutation: {
@@ -131,10 +216,11 @@ const Resolver = {
                     expense_category_id: categoryId,
                     description: description
                 });
-                if (exp) {
+                let expense = await Expense.findByPk(exp.id, {include: ['ExpenseCategory']});
+                if (expense) {
                     return {
                         success: true,
-                        expense: exp
+                        expense: expense
                     }
                 }
             } catch (error) {
@@ -160,10 +246,13 @@ const Resolver = {
                     if (args.incurredAt !== undefined) exp.incurredAt = args.incurredAt;
                     if (args.categoryId !== undefined) exp.expense_category_id = args.categoryId;
                     if (args.description !== undefined) exp.description = args.description;
-                    exp = await exp.save()
-                    return {
-                        success: true,
-                        expense: exp
+                    exp = await exp.save();
+                    let expense = await Expense.findByPk(exp.id, {include: ['ExpenseCategory']});
+                    if (expense) {
+                        return {
+                            success: true,
+                            expense: expense
+                        }
                     }
                 }
                 else {
