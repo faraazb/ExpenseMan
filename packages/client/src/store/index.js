@@ -1,12 +1,9 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import auth from './modules/auth'
-import expenses from './modules/expenses'
-// import createLogger from '../../../src/plugins/logger'
+import auth from './modules/auth';
+import expenses from './modules/expenses';
 
 Vue.use(Vuex)
-
-// const debug = process.env.NODE_ENV !== 'production'
 
 export default new Vuex.Store({
   modules: {
@@ -14,6 +11,3 @@ export default new Vuex.Store({
     expenses
   },
 });
-
-// strict: debug,
-// plugins: debug ? [createLogger()] : []

@@ -7,7 +7,6 @@
         </template>
         <template #start>
             <b-navbar-item v-if="loggedIn" tag="router-link" :to="{ path: '/dashboard' }">
-                <!-- <router-link label="Home" :to="{ name: 'Home'}" >Home</router-link> -->
                 Dashboard
             </b-navbar-item>
             <b-navbar-item v-if="loggedIn" tag="router-link" :to="{ path: '/expenses' }">

@@ -1,6 +1,5 @@
-import axios from 'axios';
-import router from '../../router';
-import { authService } from '../../services/auth.service';
+import router from '@/router';
+import { authService } from '@/services/auth.service';
 
 function parseJwt (token) {
     if (!token) {
@@ -15,7 +14,6 @@ function parseJwt (token) {
     return JSON.parse(jsonPayload);
 };
 
-// Resolve this
 const user = parseJwt(localStorage.getItem('userToken'));
 
 const state = user

@@ -10,18 +10,9 @@ import apolloProvider from './apollo';
 Vue.config.productionTip = false;
 Vue.use(Buefy);
 
-
-
-
-// const app = createApp(App).use(router).mount('#app');
-// app.use(Buefy);
-
 new Vue({
   router,
   store,
   apolloProvider,
   render: (h) => h(App),
 }).$mount('#app');
-
-
-

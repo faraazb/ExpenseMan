@@ -29,7 +29,6 @@
   height: 100%;
   display: flex;
   flex-direction: row;
-  /* justify-content: flex-start; */
 }
 
 .dashboard-amount {
@@ -67,7 +66,6 @@
 </style>
 
 <script>
-// @ is an alias to /src
 import ExpenseCard from '@/components/ExpenseCard.vue'
 import { mapActions, mapGetters } from 'vuex';
 

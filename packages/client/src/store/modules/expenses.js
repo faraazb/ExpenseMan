@@ -65,12 +65,10 @@ const getters = {
 const actions = {
     async fetchExpenses({commit}, userId) {
         try {
-            // console.log("From actions: ", userId)
             const response = await apolloClient.query({
                 query: getExpenses,
                 variables: {userId: userId}
             });
-            // console.log(response.data.getExpensesByUserId)
             commit('fetchExpensesSuccess', response.data.getExpensesByUserId)
         } catch (error) {
             console.log(error);

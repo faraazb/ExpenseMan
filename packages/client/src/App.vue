@@ -33,7 +33,6 @@ export default {
 }
 
 #main-content {
-  /* margin-top: 60px; */
   height: 100vh;
   overflow: auto;
   flex-grow: 1;

@@ -1,11 +1,10 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import Dashboard from '../views/Dashboard.vue';
-import Expenses from '../views/Expenses.vue';
-import Reports from '../views/Reports.vue'
-import Login from '../views/Login.vue';
-import SignUp from '../views/SignUp.vue'
-// import App from '../App.vue';
+import Dashboard from '@/views/Dashboard.vue';
+import Expenses from '@/views/Expenses.vue';
+import Reports from '@/views/Reports.vue'
+import Login from '@/views/Login.vue';
+import SignUp from '@/views/SignUp.vue'
 
 Vue.use(VueRouter);
 
